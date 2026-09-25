@@ -1,0 +1,9 @@
+# Pinned dependencies for crash-cayon Amazon ML Challenge 2026
+# Use: pip install -r requirements.txt
+# Python 3.10+ required
+
+# === Core ML ===
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.3.0
+scipy==1.11.1
