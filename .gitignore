@@ -178,3 +178,10 @@ sage/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+output/*.tsv
+output/*.zip
+output/rescore*.log
+__pycache__/
+venv/
+venv/
+*.pyc

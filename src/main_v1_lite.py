@@ -155,7 +155,8 @@ rows = []
 count = 0
 for s1_id in s1_te["entity_id"].values:
     if count % 100000 == 0:
-        log(f"  score {count:,}/{len(s1_te):,}", flush=True)
+        log(f"  score {count:,}/{len(s1_te):,}")
+        sys.stdout.flush()
     s1_tok_l = s1_te.set_index("entity_id")["name_tok"].get(s1_id, [])
     if not s1_tok_l:
         rows.append({"source1_entity_id": s1_id, "matched_entity_ids": ""})
