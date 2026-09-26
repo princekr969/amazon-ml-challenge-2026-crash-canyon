@@ -6,6 +6,7 @@ from pathlib import Path
 from collections import defaultdict
 
 import pandas as pd
+import gc
 
 t0 = time.time()
 def log(msg): print(f"[{time.time()-t0:.0f}s] {msg}", flush=True)
