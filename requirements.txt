@@ -15,8 +15,11 @@ regex==2024.5.10
 # === Progress bars (UX, not required for correctness) ===
 tqdm==4.66.4
 
+# === V12 pipeline required ===
+lightgbm==4.3.0
+rapidfuzz==3.9.4
+sparse-dot-topn==0.2.3
+
 # === Optional (only if you re-enable cross-encoder / embedding code) ===
 # sentence-transformers==2.7.0
 # faiss-cpu==1.8.0
-# lightgbm==4.3.0
-# rapidfuzz==3.9.4
