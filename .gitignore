@@ -185,3 +185,6 @@ __pycache__/
 venv/
 venv/
 *.pyc
+output/v3_*
+venv/
+*.pyc
