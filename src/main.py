@@ -1,10 +1,12 @@
 """Main pipeline: data → preprocessing → blocking → scoring → output."""
 import pandas as pd
+import subprocess
 from pathlib import Path
 from data_loader import load_sources
 from preprocess import preprocess_dataframe
 from blocking import all_blocks
 from collections import defaultdict
+
 
 
 def baseline_score(s1, s2, s3, candidates):
@@ -67,6 +69,20 @@ def generate_submission(test_dir: str, output_path: str):
     out.to_csv(output_path, sep="\t", index=False)
     print(f"Wrote {len(out):,} predictions to {output_path}")
 
+
+def validate_submission():
+    """Run the official validator."""
+    result = subprocess.run([
+        "python", "utils/validate_submission.py",
+        "--matching", "output/matching_results.tsv",
+        "--candidate", "output/candidate_pairs.tsv",
+        "--test-dir", "data/test",
+    ], capture_output=True, text=True)
+    if result.returncode == 0:
+        print("✅ VALIDATION PASSED")
+    else:
+        print(f"❌ VALIDATION FAILED\n{result.stdout}\n{result.stderr}")
+        raise RuntimeError("Validation failed")
 
 if __name__ == "__main__":
     generate_submission("data/test", "output/matching_results.tsv")
