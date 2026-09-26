@@ -1,8 +1,9 @@
 # ML Challenge 2026: Business Entity Resolution Solution
 
-**Team Name:** crash-canyon  
-**Team Members:** Prince Kumar (+ 3 others)  
-**Submission Date:** September 26, 2026  
+**Team Name:** crash-canyon
+**Team Members:** Prince Kumar, Harshit Vishnoi, Shubham Sharma, Yashasvi Jain
+**Submission Date:** September 26, 2026
+**Acknowledgements:** Ajay Singh — debugging support and review feedback
 
 ---
 

@@ -2,6 +2,17 @@
 
 Solution for the Business Entity Resolution problem. Match records across three independent business data sources and identify same-real-world-business entities.
 
+## Team
+
+- **Prince Kumar** — pipeline engineering, blocking, scoring
+- **Harshit Vishnoi** — feature engineering, country-aware heuristics
+- **Shubham Sharma** — data analysis, validation, evaluation harness
+- **Yashasvi Jain** — submission packaging, runbook, GitHub release
+
+## Special Thanks
+
+- **Ajay Singh** — debugging support and review feedback during the hackathon
+
 ## Quick Start
 
 ```powershell
