@@ -74,7 +74,7 @@ log(f"  Combined lookup: {len(lk_s2):,}")
 # === BLOCK (memory-safe: heap-based top-K per S1) ===
 def block(s1_df, lk, top_k=5):
     """Token-blocking with heap-based top-K. O(S1 × tokens × top_k) memory."""
-    log("  Building token index from candidate entities...", flush=True)
+    log("  Building token index from candidate entities...")
     inv = defaultdict(set)
     BATCH_COUNT = 500000
     count = 0
@@ -85,11 +85,11 @@ def block(s1_df, lk, top_k=5):
                 inv[t].add(eid)
         count += 1
         if count % BATCH_COUNT == 0:
-            log(f"    index built: {count:,}/{len(lk):,}", flush=True)
-    log(f"  Indexed {len(inv):,} unique tokens", flush=True)
+            log(f"    index built: {count:,}/{len(lk):,}")
+    log(f"  Indexed {len(inv):,} unique tokens")
     gc.collect()
 
-    log("  Blocking S1 against candidates...", flush=True)
+    log("  Blocking S1 against candidates...")
     pairs = set()
     count = 0
     s1_ids = s1_df["entity_id"].values
@@ -108,7 +108,7 @@ def block(s1_df, lk, top_k=5):
                     pairs.add((s1_id, cid))
         count += 1
         if count % 200000 == 0:
-            log(f"    blocked: {count:,}/{len(s1_ids):,}, pairs={len(pairs):,}", flush=True)
+            log(f"    blocked: {count:,}/{len(s1_ids):,}, pairs={len(pairs):,}")
     return pairs
 
 log("Blocking S1->S2...")
