@@ -1,4 +1,4 @@
-# Amazon ML Challenge 2026 — Team crash-canyon
+# Amazon ML Challenge 2026 — Team Crash-Canyon
 
 Solution for the Business Entity Resolution problem. Match records across three independent business data sources and identify same-real-world-business entities.
 
