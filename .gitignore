@@ -123,6 +123,11 @@ coverage.xml
 *.cover
 .hypothesis/
 
+# Pipeline run logs and intermediate folders (project-specific)
+pipeline_*.log
+run_log*.txt
+submission/
+
 # Translations
 *.mo
 *.pot

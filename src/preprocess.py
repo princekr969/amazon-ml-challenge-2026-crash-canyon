@@ -1,8 +1,9 @@
-"""Text preprocessing and normalization."""
+"""Text preprocessing and normalization with progress bars."""
 import re
 import pandas as pd
 import unidecode
 from typing import List
+from tqdm import tqdm
 
 LEGAL_SUFFIX_MAP = {
     r'\bpvt\.?\b': 'private', r'\bltd\.?\b': 'limited',
@@ -44,9 +45,29 @@ def normalize_address(addr: str) -> str:
     return s
 
 
-def preprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    """Add normalized name and address columns to a DataFrame."""
+def _normalize_with_progress(series, func, desc):
+    """Apply a function with a tqdm progress bar (manual wrapper)."""
+    results = []
+    # Use tqdm with total length for accurate ETA
+    for val in tqdm(series.values, desc=desc, ncols=80, total=len(series)):
+        results.append(func(val))
+    return pd.Series(results, index=series.index, name=series.name)
+
+
+def preprocess_dataframe(df: pd.DataFrame, show_progress: bool = True) -> pd.DataFrame:
+    """Add normalized name and address columns to a DataFrame. With progress bars."""
     df = df.copy()
-    df["name_norm"] = df["business_name"].apply(normalize_name)
-    df["addr_norm"] = df["business_address"].apply(normalize_address)
+
+    if show_progress and len(df) > 1000:
+        # Use manual tqdm wrapper (avoids kwarg-passing issues with progress_apply)
+        df["name_norm"] = _normalize_with_progress(
+            df["business_name"], normalize_name, "  Normalize names"
+        )
+        df["addr_norm"] = _normalize_with_progress(
+            df["business_address"], normalize_address, "  Normalize addresses"
+        )
+    else:
+        df["name_norm"] = df["business_name"].apply(normalize_name)
+        df["addr_norm"] = df["business_address"].apply(normalize_address)
+
     return df

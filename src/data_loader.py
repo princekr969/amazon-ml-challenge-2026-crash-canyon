@@ -2,30 +2,33 @@
 import pandas as pd
 from pathlib import Path
 from typing import Dict
+from tqdm import tqdm
 
 DATA_DIR = Path("data")
 
+
 def load_sources(split: str = "train") -> Dict[str, pd.DataFrame]:
     """Load all 3 source files for a given split.
-    
+
     Args:
         split: "train" or "test"
-    
+
     Returns:
         Dict with keys "s1", "s2", "s3" mapping to DataFrames.
         For train, also returns "ground_truth".
     """
     data = {}
-    for src in ["source1", "source2", "source3"]:
-        path = DATA_DIR / split / f"{split}_{src}.tsv"
-        data[src.replace("source", "s")] = pd.read_csv(
-            path, sep="\t", dtype=str
-        )
+    files = [
+        ("source1", "s1"),
+        ("source2", "s2"),
+        ("source3", "s3"),
+    ]
+    for fname, key in tqdm(files, desc=f"Loading {split} sources", ncols=80):
+        path = DATA_DIR / split / f"{split}_{fname}.tsv"
+        data[key] = pd.read_csv(path, sep="\t", dtype=str)
     if split == "train":
-        data["ground_truth"] = pd.read_csv(
-            DATA_DIR / "train" / "train_ground_truth.tsv",
-            sep="\t", dtype=str
-        )
+        gt_path = DATA_DIR / "train" / "train_ground_truth.tsv"
+        data["ground_truth"] = pd.read_csv(gt_path, sep="\t", dtype=str)
     return data
 
 
@@ -36,6 +39,7 @@ def basic_stats(df: pd.DataFrame, name: str) -> None:
     print(f"  Columns: {list(df.columns)}")
     print(f"  Missing name: {df['business_name'].isna().sum():,}")
     print(f"  Missing address: {df['business_address'].isna().sum():,}")
-    print(f"  Country distribution:")
-    for country, count in df["country"].value_counts().head().items():
-        print(f"    {country}: {count:,}")
+    if 'country' in df.columns:
+        print(f"  Country distribution:")
+        for country, count in df["country"].value_counts().head().items():
+            print(f"    {country}: {count:,}")
