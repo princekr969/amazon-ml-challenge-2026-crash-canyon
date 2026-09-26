@@ -9,7 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def fast_token_block(s1: pd.DataFrame, s2: pd.DataFrame, top_k: int = 10,
+def fast_token_block(s1: pd.DataFrame, s2: pd.DataFrame, top_k: int = 6,
                     show_progress: bool = True) -> Set[Tuple[str, str]]:
     """Token blocking with min-heap top-k per S1. Memory-safe."""
     # Step 1: Build inverted index with progress bar
@@ -22,7 +22,7 @@ def fast_token_block(s1: pd.DataFrame, s2: pd.DataFrame, top_k: int = 10,
         if not isinstance(row["name_norm"], str):
             continue
         for tok in row["name_norm"].split():
-            if len(tok) > 1 and len(token_to_s2[tok]) < 1000:
+            if len(tok) > 1 and len(token_to_s2[tok]) < 500:
                 token_to_s2[tok].add(row["entity_id"])
 
     if show_progress:
@@ -137,18 +137,29 @@ def fast_ngram_block(s1: pd.DataFrame, s2: pd.DataFrame, n: int = 2, top_k: int 
 
 
 def fast_all_blocks(s1: pd.DataFrame, s2: pd.DataFrame, top_k: int = 10,
-                    show_progress: bool = True) -> Set[Tuple[str, str]]:
-    """Union of all blocking strategies (memory-safe + progress bars)."""
+                    skip_2gram: bool = False, show_progress: bool = True) -> Set[Tuple[str, str]]:
+    """Union of all blocking strategies (memory-safe + progress bars).
+
+    Args:
+        s1, s2: source DataFrames
+        top_k: keep top-K candidates per S1 per strategy
+        skip_2gram: if True, skip the 2-gram strategy (saves ~40% memory).
+                   Useful for memory-constrained machines.
+        show_progress: tqdm bars
+    """
     print("  [1/3] Token blocking...", flush=True)
     pairs = fast_token_block(s1, s2, top_k=top_k, show_progress=show_progress)
-    print(f"    → {len(pairs):,} pairs (cumulative)", flush=True)
+    print(f"    \u2192 {len(pairs):,} pairs (cumulative)", flush=True)
 
-    print("  [2/3] 2-gram blocking...", flush=True)
-    pairs |= fast_ngram_block(s1, s2, n=2, top_k=top_k, show_progress=show_progress)
-    print(f"    → {len(pairs):,} pairs (cumulative)", flush=True)
+    if not skip_2gram:
+        print("  [2/3] 2-gram blocking...", flush=True)
+        pairs |= fast_ngram_block(s1, s2, n=2, top_k=top_k, show_progress=show_progress)
+        print(f"    \u2192 {len(pairs):,} pairs (cumulative)", flush=True)
+    else:
+        print("  [2/3] 2-gram blocking skipped (memory-lite mode)", flush=True)
 
     print("  [3/3] 3-gram blocking...", flush=True)
     pairs |= fast_ngram_block(s1, s2, n=3, top_k=top_k, show_progress=show_progress)
-    print(f"    → {len(pairs):,} pairs (cumulative)", flush=True)
+    print(f"    \u2192 {len(pairs):,} pairs (cumulative)", flush=True)
 
     return pairs
