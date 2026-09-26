@@ -1,6 +1,6 @@
 # Amazon ML Challenge 2026 — Team Crash-Canyon
 
-Solution for the Business Entity Resolution problem. Match records across three independent business data sources and identify same-real-world-business entities.
+Solution for the **Business Entity Resolution** problem: match records across three independent business data sources and identify same-real-world-business entities. Optimised for the **macro F_0.5** metric (precision weighted 2× recall).
 
 ## Team
 
@@ -12,40 +12,84 @@ Solution for the Business Entity Resolution problem. Match records across three 
 ## Special Thanks
 
 - **Ajay Singh** — debugging support and review feedback during the hackathon
+- **Anthropic Claude Opus 4.5** — V12 architecture design (multi-channel blocking, 2-stage LightGBM, expected F_0.5 subset selection)
 
-## Quick Start
+## Current Best: V12 (production-grade)
+
+See `src/README_V12.md` for full architecture details and `Documentation_template.md` for the official methodology write-up.
+
+## Quick Start (V12 — recommended)
 
 ```powershell
-# 1. Run end-to-end pipeline
-.\venv\Scripts\python.exe -u src\main_fast.py
-# (writes output/matching_results.tsv and output/candidate_pairs.tsv)
+# 1. Install dependencies (run once)
+pip install -r requirements.txt
 
-# 2. Validate
-.\venv\Scripts\python.exe data\utils\validate_submission.py `
+# 2. Run end-to-end V12 pipeline on AWS g5.xlarge or local
+python src/er_v12.py --data /path/to/dataset --out output/
+
+# 3. (Optional) Validate locally
+python data\utils\validate_submission.py `
     --matching output\matching_results.tsv `
     --candidate output\candidate_pairs.tsv `
     --test-dir data\test
 
-# 3. Bundle the final submission ZIP
-.\make_submission_zip.ps1
+# 4. Submission is at output/outputs_V12.zip
 ```
 
-## Pipeline
+## V12 Pipeline (5-stage)
 
-1. **Load** test sources (S1, S2, S3) with progress bar
-2. **Preprocess** names + addresses (Unicode → ASCII, lowercase, tokenize)
-3. **Block** S1 → S2 and S1 → S3 with token + 2-gram + 3-gram inverted index
-4. **Score** candidates by token overlap (names + addresses)
-5. **Output** `candidate_pairs.tsv` (blocking model input) + `matching_results.tsv` (top-K=3 scored)
+```
+RAW ──► [1] Normalize ──► [2] Block ──► [3] 2-Stage LGBM ──► [4] Calibrate ──► [5] Decide ──► ZIP
+       name+address      TF-IDF + key    stage1 → stage2       Isotonic         Expected F_0.5
+       abbrev expand     joins per       34 features +         regression       subset selection
+       +postal+house     country         context (reverse                      (per-entity k)
+       extraction                       rank, score gap)
+```
 
-See `Documentation_template.md` for full methodology.
+**Critical design choices** (each one fixes a V11 bug):
+
+| Choice | Why it wins |
+|---|---|
+| **Top-1 cap → expected F_0.5 subset selection** | Recovers full recall — picks optimal k per S1 based on calibrated probs |
+| **GroupKFold by S1 (5-fold)** | No validation leakage — same S1 never in train+val |
+| **Per-country TF-IDF blocking** | France open-set handled automatically (cross-country = 0 candidates) |
+| **Isotonic calibration** | Honest probabilities for F_0.5 math |
+| **One-to-one enforcement** | Each S2/S3 record → at most one S1 |
+| **34 features incl. reverse-rank** | Captures competition among S1s for same target |
+
+## Earlier versions (kept for history)
+
+- **V1** (`src/main_fast.py`) — simple token-inverted-index blocking + jaccard scoring, top-K=3 cap. Submitted, scored 0.133 (precision too low).
+- **V1.1 STRICT** (`src/rescore_strict.py`) — top-2 cap with thr=0.70. Same 0.133 score format.
+- **V11** (`scripts/aws_v11_NOTEBOOK.py`) — 19 features with per-(country, source) thresholds. Had blocking truncation issues, abandoned.
+- **V12** (`src/er_v12.py`) — **current best**, see above.
 
 ## File Layout
 
 ```
-data/                  # train + test TSVs
-src/                   # pipeline code
-output/                # generated TSVs
-make_submission_zip.ps1   # build submission zip
-requirements.txt       # pinned deps
+data/                       # train + test TSVs (shared across versions)
+src/                        # source code
+  main_fast.py              # V1 baseline (legacy)
+  rescore_strict.py         # V1.1 STRICT scorer (legacy)
+  er_v12.py                 # V12 production pipeline ← RUN THIS
+  README_V12.md             # V12 architecture + run instructions
+output/                     # generated TSVs (per-version subdirs)
+  output/matching_results.tsv    # V12 final predictions
+  output/candidate_pairs.tsv    # V12 candidates the model scored
+  output/outputs_V12.zip        # V12 submission zip
+  output/artifacts/             # LightGBM models + OOF summary
+scripts/                    # PowerShell + per-version SageMaker cells
+make_submission_zip.ps1     # legacy submission packager
+requirements.txt            # pinned deps (lightgbm, rapidfuzz, sparse-dot-topn, ...)
+Documentation_template.md   # official methodology write-up (V12)
 ```
+
+## Performance notes
+
+- **AWS g5.xlarge** (4 vCPU + A10G): V12 runs in ~35-50 min
+- **Local 16 GB**: OOM risk during TF-IDF blocking on full data — recommend AWS or `--train-sample 200000` for local debug
+- **Memory peak**: ~10-12 GB during stage-2 inference
+
+## License
+
+This codebase is original work by team crash-canyon. Models used are MIT/Apache-licensed (LightGBM, scikit-learn, rapidfuzz, sparse-dot-topn). No external data or paid APIs were used.
