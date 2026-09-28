@@ -92,8 +92,6 @@ python data\utils\validate_submission.py `
 | **V30** | **Second-hop candidates (sibling retrieval) + S1-keep validation** | — | (folded into V31) |
 | **V31** | **Competition features + full S1 scoring (FINAL)** | **0.951853 🏆** | 27 Sep, evening |
 
-> **Note on 0.551**: V22 was scored on an incomplete AWS data copy (data sync was partial), which is why it looked low. The model itself was sound — V24 confirmed it on the full official data (0.918).
-
 ## V31 Pipeline (final architecture)
 
 ```
