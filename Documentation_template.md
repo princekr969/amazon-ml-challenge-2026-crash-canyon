@@ -409,7 +409,8 @@ python src/er_v31.py --data-dir /path/to/dataset --out-dir output --workers 4
 
 ### C. Performance characteristics
 
-- **AWS g5.xlarge** (4 vCPU + A10G): ~35-50 min for full V31
+- **AWS ml.m5.4xlarge** (16 vCPU + 64 GB RAM, CPU-only): primary instance for V22-V31 — ~45-60 min for full V31
+- **AWS g5.xlarge** (4 vCPU + A10G + 16 GB GPU): V12/V20 prototype runs — ~35-50 min for full V31
 - **Memory peak**: ~10-12 GB during stage-2 inference
 - **Disk**: ~200 MB for output files
 - **Cache reuse**: V22-V31 share `--work-dir` for fast re-runs (~5 min vs ~30 min)

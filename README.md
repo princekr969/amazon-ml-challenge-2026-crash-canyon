@@ -156,7 +156,8 @@ README.md                   # this file
 
 ## Performance notes
 
-- **AWS g5.xlarge** (4 vCPU + A10G): V31 runs in ~35-50 min
+- **AWS ml.m5.4xlarge** (16 vCPU + 64 GB RAM, CPU-only): primary instance for V22-V31 — all post-hackathon iterations ran here, ~45-60 min for V31
+- **AWS g5.xlarge** (4 vCPU + A10G + 16 GB GPU): V12/V20 prototype runs, ~35-50 min for V31
 - **Local 16 GB**: OOM risk during blocking — recommend `--train-s1 100000` for local debug
 - **Memory peak**: ~10-12 GB during stage-2 inference
 - **Cache reuse**: V22-V31 share `--work-dir` for fast re-runs
