@@ -46,6 +46,7 @@ Solution for the **Business Entity Resolution** problem: match records across th
 
 - **Ajay Singh** — debugging support and review feedback during the hackathon
 - **Anthropic Claude Opus 4.5** — V12-V31 architecture design (5-stage pipeline, expected-F_0.5 subset selection, multi-channel blocking, learned equivalences, competition features, second-hop retrieval, transliteration)
+- **MiniMax / MiniMax-M3 (Mavis)** — final-iteration code review, documentation polish, score-progression visualization, GitHub release management, V22-V31 push & cleanup
 
 ## Current Best: V31 (final production pipeline)
 
