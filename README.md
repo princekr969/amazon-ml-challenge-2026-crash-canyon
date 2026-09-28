@@ -8,7 +8,7 @@ Solution for the **Business Entity Resolution** problem: match records across th
 |---|---|---|
 | **Rank** | **2612** | Top 1: 0.990788 |
 | **Overall F_0.5** | **0.951853** | Gap to #1: ~0.039 |
-| Team | crash-canyon (5 members) | |
+| Team | crash-canyon (4 members) | |
 | Best pipeline | V31 (5-stage + competition features) | |
 | Total iterations | 14 versions (V1, V1.1, V11-V12, V20-V31) | |
 
