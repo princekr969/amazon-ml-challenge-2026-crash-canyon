@@ -62,6 +62,7 @@ logs/
 data/
 cache/
 output/
+submission_versions/
 *.tsv
 *.csv
 *.parquet
