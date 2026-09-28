@@ -12,6 +12,29 @@ Solution for the **Business Entity Resolution** problem: match records across th
 | Best pipeline | V31 (5-stage + competition features) | |
 | Total iterations | 14 versions (V1, V1.1, V11-V12, V20-V31) | |
 
+## 📈 Score Progression
+
+```
+ V1   baseline (jaccard, top-K=3)        0.133  ███░░░░░░░░░░░░░░░░░░░░░░░░░  ← started from scratch
+ V12+ first real 5-stage pipeline        0.551  █████████████▌░░░░░░░░░░░░░  ← multi-channel blocking + LGBM
+ V22+ refinement + learned equivalences  0.918  ███████████████████████▌░░  ← reverse blocking + cache
+ V30  second-hop + transliteration       0.947  █████████████████████████▌░  ← catches hidden siblings
+ V31  FINAL — competition features 🏆    0.952  █████████████████████████▌░  ← cross-S1 tie-breaking
+                                         ─────  ────────────────────────────
+                                         0.000                            1.000
+```
+
+**Score lifted 7.2×** in 14 iterations: **0.133 → 0.952** 📈
+
+| Milestone | Δ F_0.5 | What changed |
+|---|---|---|
+| 0.133 → 0.551 | **+0.418** | Baseline jaccard → 5-stage multi-channel TF-IDF + LGBM |
+| 0.551 → 0.918 | **+0.367** | Reverse blocking + on-disk cache + learned token equivalences |
+| 0.918 → 0.947 | **+0.029** | Second-hop retrieval + transliteration + French normalization |
+| 0.947 → 0.952 | **+0.005** | Competition features (cross-S1 tie-breaking on contested records) |
+
+> The last 0.005 took 1 day but mattered most — that's the precision-4×-weighted slice of F_0.5.
+
 ## Team
 
 - **Prince Kumar** — pipeline engineering, blocking, scoring, V1-V31 integration
