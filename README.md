@@ -15,25 +15,26 @@ Solution for the **Business Entity Resolution** problem: match records across th
 ## 📈 Score Progression
 
 ```
- V1   baseline (jaccard, top-K=3)        0.133  ███░░░░░░░░░░░░░░░░░░░░░░░░░  ← started from scratch
- V12+ first real 5-stage pipeline        0.551  █████████████▌░░░░░░░░░░░░░  ← multi-channel blocking + LGBM
- V22+ refinement + learned equivalences  0.918  ███████████████████████▌░░  ← reverse blocking + cache
- V30  second-hop + transliteration       0.947  █████████████████████████▌░  ← catches hidden siblings
- V31  FINAL — competition features 🏆    0.952  █████████████████████████▌░  ← cross-S1 tie-breaking
+ V10/V11 era baseline (jaccard, top-K=3)  0.133  ███░░░░░░░░░░░░░░░░░░░░░░░░░  ← 26 Sep, 5:31 PM
+ V22 reverse blocking + on-disk cache     0.551  █████████████▌░░░░░░░░░░░░░  ← 27 Sep, 9:48 AM (incomplete AWS copy)
+ V24 learned pruning + 2-stage LGBM       0.918  ███████████████████████▌░░  ← 27 Sep, 2:14 PM (first official data run)
+ V27 + address + transliteration + stage3 0.947  █████████████████████████▌░  ← 27 Sep, 7:25 PM
+ V31 FINAL — competition features 🏆      0.952  █████████████████████████▌░  ← 27 Sep, evening
                                          ─────  ────────────────────────────
                                          0.000                            1.000
 ```
 
 **Score lifted 7.2×** in 14 iterations: **0.133 → 0.952** 📈
 
-| Milestone | Δ F_0.5 | What changed |
-|---|---|---|
-| 0.133 → 0.551 | **+0.418** | Baseline jaccard → 5-stage multi-channel TF-IDF + LGBM |
-| 0.551 → 0.918 | **+0.367** | Reverse blocking + on-disk cache + learned token equivalences |
-| 0.918 → 0.947 | **+0.029** | Second-hop retrieval + transliteration + French normalization |
-| 0.947 → 0.952 | **+0.005** | Competition features (cross-S1 tie-breaking on contested records) |
+| Submitted | Version | Δ F_0.5 | What changed | Wall-time |
+|---|---|---|---|---|
+| 26 Sep, 5:31 PM | V10/V11 era | — | Baseline jaccard + top-K=3 | — |
+| 27 Sep, 9:48 AM | V22 | **+0.418** | Reverse blocking + on-disk cache (incomplete AWS copy → low) | ~16 h |
+| 27 Sep, 2:14 PM | V24 | **+0.367** | First official run: learned pruning + 2-stage LGBM | ~4 h |
+| 27 Sep, 7:25 PM | V27 | **+0.029** | + address channel + transliteration + name splitting + stage 3 | ~5 h |
+| 27 Sep, evening  | **V31** | **+0.005** | + V29 noise fixes + second hop + competition features (`--s1-keep 0.81`) | ~2 h |
 
-> The last 0.005 took 1 day but mattered most — that's the precision-4×-weighted slice of F_0.5.
+> The last 0.005 took ~2 hours but mattered most — that's the precision-4×-weighted slice of F_0.5.
 
 ## Team
 
@@ -72,24 +73,26 @@ python data\utils\validate_submission.py `
 
 ## Pipeline Evolution (14 versions)
 
-| Version | Key addition | Score impact |
-|---|---|---|
-| V1 | Token-inverted-index blocking + jaccard scoring, top-K=3 | 0.133 (low precision) |
-| V1.1 | STRICT threshold (0.70), top-2 cap | 0.133 (same format, low precision) |
-| V11 | 19 features, per-(country, source) thresholds | abandoned (tuple-unpack bug) |
-| V12 | Production 5-stage: TF-IDF blocking + 2-stage LGBM + expected-F_0.5 | (AWS OOM) |
-| V20 | char 3-gram + optional sparse_dot_topn + top-2 exclusivity | (still iterating) |
-| V21 | HashingVectorizer (low memory ~6-8 GB) | |
-| V22 | Reverse blocking + on-disk cache + stage-2 K-fold OOF | |
-| V23 | Learned token equivalences + error report | |
-| V24 | Learned candidate pruning (smaller candidate_pairs.tsv) | |
-| V25 | Address-only blocking + state normalization (US + IN) | |
-| V26 | Stage-2 K-fold OOF + Stage-3 set coherence + filtered equivalences | |
-| V27 | Learned transliteration (native-script) + glued-name segmentation + French norm | |
-| V28 | Fixed exclusivity + French noise + dotted acronyms | |
-| V29 | Repeated words removed + look-alike digits + ordinals + STREET-WORDS features | |
-| **V30** | **Second-hop candidates (sibling retrieval) + S1-keep validation** | |
-| **V31** | **Competition features + full S1 scoring (FINAL)** | **0.951853** |
+| Version | Key addition | F_0.5 | Submitted |
+|---|---|---|---|
+| V1 | Token-inverted-index blocking + jaccard scoring, top-K=3 | **0.133** | 26 Sep, 5:31 PM |
+| V1.1 | STRICT threshold (0.70), top-2 cap | 0.133 | (same format, low precision) |
+| V11 | 19 features, per-(country, source) thresholds | abandoned | (tuple-unpack bug) |
+| V12 | Production 5-stage: TF-IDF blocking + 2-stage LGBM + expected-F_0.5 | — | (AWS OOM) |
+| V20 | char 3-gram + optional sparse_dot_topn + top-2 exclusivity | — | (still iterating) |
+| V21 | HashingVectorizer (low memory ~6-8 GB) | — | (still iterating) |
+| **V22** | Reverse blocking + on-disk cache + stage-2 K-fold OOF | **0.551** | 27 Sep, 9:48 AM |
+| V23 | Learned token equivalences + error report | — | (still iterating) |
+| **V24** | Learned candidate pruning (smaller candidate_pairs.tsv) | **0.918** | 27 Sep, 2:14 PM |
+| V25 | Address-only blocking + state normalization (US + IN) | — | (still iterating) |
+| V26 | Stage-2 K-fold OOF + Stage-3 set coherence + filtered equivalences | — | (still iterating) |
+| **V27** | Learned transliteration (native-script) + glued-name segmentation + French norm | **0.947** | 27 Sep, 7:25 PM |
+| V28 | Fixed exclusivity + French noise + dotted acronyms | — | (still iterating) |
+| V29 | Repeated words removed + look-alike digits + ordinals + STREET-WORDS features | — | (still iterating) |
+| **V30** | **Second-hop candidates (sibling retrieval) + S1-keep validation** | — | (folded into V31) |
+| **V31** | **Competition features + full S1 scoring (FINAL)** | **0.951853 🏆** | 27 Sep, evening |
+
+> **Note on 0.551**: V22 was scored on an incomplete AWS data copy (data sync was partial), which is why it looked low. The model itself was sound — V24 confirmed it on the full official data (0.918).
 
 ## V31 Pipeline (final architecture)
 
